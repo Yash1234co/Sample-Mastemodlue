@@ -16,7 +16,7 @@ const createProducts = async (req, res) => {
             const nextcodenumber = lastCodenumber + 1
             codenumber = String(nextcodenumber).padStart(3, '0')
         }
-        
+
         const newProduct = new Products({ ProductName, Category, Brand, ProductType, })
         await newProduct.save()
 
@@ -30,3 +30,8 @@ const createProducts = async (req, res) => {
 }
 
 exports.createProducts = createProducts
+
+
+const getproductrs=async(req,res)=>{
+      const {ProductName,Category,Brand,ProductType}=req.query
+}
