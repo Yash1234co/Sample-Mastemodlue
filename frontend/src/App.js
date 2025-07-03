@@ -2,17 +2,19 @@ import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Sample from "./Componentes/Sample";
 import AddCommentPage from "./Componentes/Comments";
 import SampleImageManager from "./Componentes/images";
-import Product from "./Componentes/Products";
+import Sidebar from "./Componentes/MasterModuleSidebar";
+import Product from "./Componentes/Product";
 
 export default function App() {
   return (
     <Router>
       <div className="p-6">
         <Routes>
-          <Route path="/" element={<Product/>}/>
+          <Route path="/" element={<Sidebar/>}/>
           <Route path="/sample" element={<Sample />} />
           <Route path="/sample/:sampleId/comments" element={<AddCommentPage />} />
-          <Route path="/sample/:sampleId/upload-image" element={<SampleImageManager />} /> {/* Add this */}
+          <Route path="/sample/:sampleId/upload-image" element={<SampleImageManager />} /> 
+          <Route path="/products" element={<Product/>}/>
         </Routes>
       </div>
     </Router>

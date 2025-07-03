@@ -53,7 +53,7 @@ export default function AddCommentPage() {
 
   return (
     <div className="max-w-4xl mx-auto mt-10 p-6 bg-white shadow rounded">
-      {/* Header with navigation */}
+
       <div className="flex justify-between items-center mb-6">
         <h2 className="text-2xl font-bold text-blue-700">
           Sample Ref:{" "}
@@ -83,7 +83,7 @@ export default function AddCommentPage() {
         </div>
       </div>
 
-      {/* Comment Form */}
+     
       <form onSubmit={handleSubmit} className="space-y-4">
         <textarea
           rows="4"
@@ -101,7 +101,7 @@ export default function AddCommentPage() {
         {message && <p className="text-sm text-gray-700 mt-2">{message}</p>}
       </form>
 
-      {/* Comment List */}
+      
       <div className="mt-8">
         <h3 className="text-lg font-semibold mb-3">Previous Comments</h3>
         {comments.length === 0 ? (

@@ -92,7 +92,7 @@ export default function Sample() {
 
         <button
           className="bg-gray-300 hover:bg-gray-400 text-black py-3 px-5 rounded"
-          onClick={() => navigate(-1)}
+          onClick={() => navigate('/')}
         >
           ← Back
         </button>

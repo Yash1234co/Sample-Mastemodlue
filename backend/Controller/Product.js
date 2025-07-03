@@ -9,7 +9,6 @@ const createProducts = async (req, res) => {
         }
         const codenumber = await Products.findOne().sort({ productCode: -1 })
 
-
         codenumber = '001'
         if (codenumber && codenumber.productCode) {
             const lastCodenumber = parseInt(codenumber.productCode.replace('PRD', ''))
@@ -29,9 +28,31 @@ const createProducts = async (req, res) => {
 
 }
 
-exports.createProducts = createProducts
 
 
-const getproductrs=async(req,res)=>{
-      const {ProductName,Category,Brand,ProductType}=req.query
+const getproductrs = async (req, res) => {
+    try {
+        const { ProductName, Category, Brand, ProductType } = req.query
+        const filter = {}
+
+        if (ProductName && ProductName.trim()) filter.ProductName = ProductName.trim()
+        if (Category && Category.trim()) filter.Category = Category.trim()
+        if (Brand && Brand.trim()) filter.Brand = Brand.trim()
+        if (ProductType && ProductType.trim()) filter.ProductType.trim()
+
+        const filtredData = await Products.find(filter)
+
+        console.log("filter are used", filter)
+        console.log("Data get sucessfully", filtredData)
+
+        res.status(200).json({ filtredData })
+
+    }
+    catch (err) {
+        console.error("fecthig error");
+        res.status(500).json({ message: "Server error", error: err.message })
+    }
 }
+
+exports.createProducts = createProducts
+exports.getproductrs=getproductrs

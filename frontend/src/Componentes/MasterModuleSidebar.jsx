@@ -4,6 +4,7 @@ export default function Sidebar() {
   const navigate = useNavigate();
 
   return (
+    <>
     <aside className="fixed  left-0 w-64 h-screen bg-[#1C2532] text-white shadow-lg z-50 rounded-tr-2xl rounded-br-2xl">
       <div className="flex flex-col px-4 pt-4">
         <h2 className="text-xl font-semibold text-center mb-3">Dashboard</h2>
@@ -23,5 +24,8 @@ export default function Sidebar() {
         </button>
       </div>
     </aside>
+
+
+</>
   );
 }
