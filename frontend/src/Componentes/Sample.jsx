@@ -26,7 +26,7 @@ export default function Sample() {
     fetchSamples();
   }, [showForm]);
 
-  const handleChange = (e) => {
+  const handleChange = (e) => { 
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
@@ -98,7 +98,7 @@ export default function Sample() {
         </button>
       </div>
 
-      {/* Modal for Adding Sample */}
+  
       {showForm && (
         <div className="fixed inset-0 bg-black bg-opacity-40 flex justify-center items-center z-50">
           <div className="bg-white p-6 rounded-lg shadow-lg w-96">
