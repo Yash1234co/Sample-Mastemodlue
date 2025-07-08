@@ -5,7 +5,7 @@ const productSchema = new mongoose.Schema({
     Category: { type: String },
     Brand: { type: String },
     ProductType: { type: String },
- productCode: {
+     productCode: {
     type: String,
     unique: true,
     sparse:true

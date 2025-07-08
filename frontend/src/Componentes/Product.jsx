@@ -13,18 +13,20 @@ export default function Product() {
   const [autoGenerate, setAutoGenerate] = useState(false);
   const [products, setProducts] = useState([]);
   const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
   const navigate = useNavigate();
 
+  const fetchProducts = async () => {
+    try {
+      const res = await axios.get("http://localhost:3000/products");
+      setProducts(Array.isArray(res.data) ? res.data : []);
+    } catch (err) {
+      console.error("Error fetching products:", err.message);
+      setError("Failed to fetch products");
+    }
+  };
+
   useEffect(() => {
-    const fetchProducts = async () => {
-      try {
-        const res = await axios.get("http://localhost:3000/products");
-        setProducts(Array.isArray(res.data) ? res.data : []);
-      } catch (err) {
-        console.error("Error fetching products:", err.message);
-        setError("Failed to fetch products");
-      }
-    };
     fetchProducts();
   }, [showForm]);
 
@@ -36,18 +38,22 @@ export default function Product() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
+    setSuccess("");
 
     try {
-      const payload = { ...formData, autoGenerate }; // Pass true/false flag
+      const payload = { ...formData, autoGenerate };
       const res = await axios.post("http://localhost:3000/createProduct", payload);
       if (res.status === 200) {
+        setSuccess("Product created successfully.");
         setFormData({ ProductName: "", Category: "", Brand: "", ProductType: "" });
         setAutoGenerate(false);
         setShowForm(false);
+        fetchProducts(); // refresh table
       }
     } catch (err) {
-      console.error("Error submitting:", err.message);
-      setError("Failed to create product");
+      console.error("Error submitting:", err.response?.data || err.message);
+      const msg = err.response?.data?.message || "Failed to create product";
+      setError(msg);
     }
   };
 
@@ -116,6 +122,7 @@ export default function Product() {
           <div className="bg-white p-6 rounded-xl shadow-md w-80">
             <h2 className="text-xl font-bold mb-4 text-center">Add New Product</h2>
             {error && <p className="text-red-600 text-sm mb-2">{error}</p>}
+            {success && <p className="text-green-600 text-sm mb-2">{success}</p>}
             <form onSubmit={handleSubmit} className="space-y-3">
               <input
                 type="text"
@@ -160,7 +167,6 @@ export default function Product() {
                 <option value="Accessories">Accessories</option>
               </select>
 
-              {/* Auto Generate Checkbox */}
               <div className="flex items-center pt-2">
                 <input
                   type="checkbox"
