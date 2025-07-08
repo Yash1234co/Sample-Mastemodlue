@@ -1,31 +1,98 @@
 import { useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
+import axios from "axios";
 
 export default function Sidebar() {
+  const [Products, SetProducts] = useState([]);
+  const [error, seterror] = useState("");
+
   const navigate = useNavigate();
 
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        const res = await axios.get("http://localhost:3000/products");
+
+        if (res.status === 200) {
+          const data = res.data;
+          const productArray = Array.isArray(data) ? data : data.Products || [];
+          SetProducts(productArray);
+        }
+      } catch (err) {
+        console.error("Fetch error:", err);
+        seterror("Failed to fetch products");
+      }
+    };
+
+    fetchProducts();
+  }, []);
+
   return (
-    <>
-    <aside className="fixed  left-0 w-64 h-screen bg-[#1C2532] text-white shadow-lg z-50 rounded-tr-2xl rounded-br-2xl">
-      <div className="flex flex-col px-4 pt-4">
-        <h2 className="text-xl font-semibold text-center mb-3">Dashboard</h2>
+    <div className="flex min-h-screen bg-gray-100">
+      {/* Sidebar */}
+      <aside className="fixed top-16 left-0 w-64 h-[calc(100vh-4rem)] bg-slate-900 text-white shadow-lg z-40">
+        <div className="flex flex-col px-4 py-6 space-y-4">
+          <h2 className="text-2xl font-bold text-center">Dashboard</h2>
 
-        <button
-          className="bg-gray-100 text-[#1C2532] font-semibold rounded-lg px-4 py-2 mb-2 hover:bg-black hover:text-white transition-all duration-200"
-          onClick={() => navigate('/products')}
-        >
-          Products
-        </button>
+          <button
+            className="bg-slate-100 text-slate-900 font-semibold rounded-lg px-4 py-2 hover:bg-slate-700 hover:text-white transition-all duration-200"
+            onClick={() => navigate("/products")}
+          >
+            Products{" "}
+            <span className="text-sm text-gray-500 ml-1">({Products.length})</span>
+          </button>
 
-        <button
-          className="bg-gray-100 text-[#1C2532] font-semibold rounded-lg px-4 py-2 hover:bg-black hover:text-white transition-all duration-200"
-          onClick={() => navigate('/sample')}
-        >
-          Sample
-        </button>
-      </div>
-    </aside>
+          <button
+            className="bg-slate-100 text-slate-900 font-semibold rounded-lg px-4 py-2 hover:bg-slate-700 hover:text-white transition-all duration-200"
+            onClick={() => navigate("/sample")}
+          >
+            Sample
+          </button>
 
+          {error && <p className="text-red-400 text-sm text-center">{error}</p>}
+        </div>
+      </aside>
 
-</>
+      {/* Header */}
+      <header className="fixed top-0 left-0 w-full h-16 bg-slate-800 text-white shadow-md z-50 flex items-center justify-between px-6">
+        <h1 className="text-2xl font-bold">My Admin Panel</h1>
+      </header>
+
+      {/* Main Content */}
+      <main className="ml-64 w-full pt-24 px-8">
+        <div className="overflow-x-auto bg-white rounded-lg shadow border border-gray-300">
+          <table className="min-w-full divide-y divide-gray-300 text-sm">
+            <thead className="bg-gray-200 text-gray-700 uppercase text-xs">
+              <tr>
+                <th className="px-6 py-3 text-left">Product Code</th>
+                <th className="px-6 py-3 text-left">Product Name</th>
+                <th className="px-6 py-3 text-left">Category</th>
+                <th className="px-6 py-3 text-left">Brand</th>
+                <th className="px-6 py-3 text-left">Product Type</th>
+              </tr>
+            </thead>
+            <tbody className="bg-white divide-y divide-gray-200">
+              {Array.isArray(Products) && Products.length > 0 ? (
+                Products.map((product, index) => (
+                  <tr key={index} className="hover:bg-gray-50">
+                    <td className="px-6 py-4">{product.productCode || "—"}</td>
+                    <td className="px-6 py-4">{product.ProductName}</td>
+                    <td className="px-6 py-4">{product.Category}</td>
+                    <td className="px-6 py-4">{product.Brand}</td>
+                    <td className="px-6 py-4">{product.ProductType}</td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td className="px-6 py-4 text-center text-gray-500" colSpan="5">
+                    No products found.
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+      </main>
+    </div>
   );
 }

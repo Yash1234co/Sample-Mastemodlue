@@ -3,14 +3,15 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 export default function Product() {
-  const [Showform, setShowform] = useState(false);
-  const [formdata, setformdata] = useState({
+  const [showForm, setShowForm] = useState(false);
+  const [formData, setFormData] = useState({
     ProductName: "",
     Category: "",
     Brand: "",
     ProductType: "",
   });
-  const [Products, setProducts] = useState([]);
+  const [autoGenerate, setAutoGenerate] = useState(false);
+  const [products, setProducts] = useState([]);
   const [error, setError] = useState("");
   const navigate = useNavigate();
 
@@ -18,75 +19,68 @@ export default function Product() {
     const fetchProducts = async () => {
       try {
         const res = await axios.get("http://localhost:3000/products");
-        if (res.status === 200) {
-          const data = res.data;
-          const productArray = Array.isArray(data)
-            ? data
-            : data.products || [];
-          setProducts(productArray);
-        }
+        setProducts(Array.isArray(res.data) ? res.data : []);
       } catch (err) {
-        console.error("Fetch error:", err.message);
+        console.error("Error fetching products:", err.message);
         setError("Failed to fetch products");
       }
     };
     fetchProducts();
-  }, [Showform]);
+  }, [showForm]);
 
-  function handleChnage(e) {
+  const handleChange = (e) => {
     const { name, value } = e.target;
-    setformdata((prev) => ({ ...prev, [name]: value }));
-  }
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
 
-  async function handlesubmit(e) {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
 
     try {
-      const res = await axios.post("http://localhost:3000/createProduct", formdata);
+      const payload = { ...formData, autoGenerate }; // Pass true/false flag
+      const res = await axios.post("http://localhost:3000/createProduct", payload);
       if (res.status === 200) {
-        setformdata({
-          ProductName: "",
-          Category: "",
-          Brand: "",
-          ProductType: "",
-        });
-        setShowform(false);
+        setFormData({ ProductName: "", Category: "", Brand: "", ProductType: "" });
+        setAutoGenerate(false);
+        setShowForm(false);
       }
     } catch (err) {
+      console.error("Error submitting:", err.message);
       setError("Failed to create product");
     }
-  }
+  };
 
   return (
     <>
       {/* Header */}
-      <header className="fixed top-0 left-0 w-full bg-blue-700 text-white shadow-lg z-50">
+      <header className="fixed top-0 left-0 w-full bg-blue-700 text-white shadow-md z-50">
         <div className="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
           <h1 className="text-xl font-bold">Product Manager</h1>
           <div className="space-x-4">
             <button
-              onClick={() => setShowform(!Showform)}
-              className="bg-white text-blue-700 px-4 py-2 rounded-md font-semibold hover:bg-blue-100 transition"
+              onClick={() => setShowForm(true)}
+              className="bg-white text-blue-700 px-4 py-2 rounded-md font-semibold hover:bg-blue-100"
             >
               + Add Product
             </button>
             <button
               onClick={() => navigate("/")}
-              className="bg-white text-blue-700 px-4 py-2 rounded-md font-semibold hover:bg-blue-100 transition"
+              className="bg-white text-blue-700 px-4 py-2 rounded-md font-semibold hover:bg-blue-100"
             >
               Back
             </button>
           </div>
         </div>
       </header>
-       d.
-      {/* Table */}
+
+      {/* Product Table */}
       <main className="pt-28 px-6">
         <div className="overflow-x-auto rounded-lg shadow border border-gray-300">
           <table className="min-w-full divide-y divide-gray-300 text-sm">
             <thead className="bg-gray-200 text-gray-700 uppercase text-xs">
               <tr>
+                <th className="px-6 py-3 text-left">Product Code</th>
                 <th className="px-6 py-3 text-left">Product Name</th>
                 <th className="px-6 py-3 text-left">Category</th>
                 <th className="px-6 py-3 text-left">Brand</th>
@@ -94,9 +88,10 @@ export default function Product() {
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
-              {Array.isArray(Products) && Products.length > 0 ? (
-                Products.map((product, index) => (
-                  <tr key={index} className="hover:bg-gray-50">
+              {products.length > 0 ? (
+                products.map((product, i) => (
+                  <tr key={i} className="hover:bg-gray-50">
+                    <td className="px-6 py-4">{product.productCode || "—"}</td>
                     <td className="px-6 py-4">{product.ProductName}</td>
                     <td className="px-6 py-4">{product.Category}</td>
                     <td className="px-6 py-4">{product.Brand}</td>
@@ -105,7 +100,7 @@ export default function Product() {
                 ))
               ) : (
                 <tr>
-                  <td className="px-6 py-4 text-center text-gray-500" colSpan="4">
+                  <td colSpan="5" className="px-6 py-4 text-center text-gray-500">
                     No products found.
                   </td>
                 </tr>
@@ -115,37 +110,37 @@ export default function Product() {
         </div>
       </main>
 
-      {/* Modal */}
-      {Showform && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm flex justify-center items-center z-50">
-          <div className="bg-white p-6 rounded-xl shadow-lg w-[22rem]">
-            <h2 className="text-xl font-bold text-center mb-4">Add New Product</h2>
+      {/* Add Product Modal */}
+      {showForm && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
+          <div className="bg-white p-6 rounded-xl shadow-md w-80">
+            <h2 className="text-xl font-bold mb-4 text-center">Add New Product</h2>
             {error && <p className="text-red-600 text-sm mb-2">{error}</p>}
-            <form onSubmit={handlesubmit} className="space-y-3">
+            <form onSubmit={handleSubmit} className="space-y-3">
               <input
                 type="text"
                 name="ProductName"
-                value={formdata.ProductName}
-                onChange={handleChnage}
+                value={formData.ProductName}
+                onChange={handleChange}
                 placeholder="Product Name"
                 required
-                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 border border-gray-300 rounded"
               />
               <input
                 type="text"
                 name="Category"
-                value={formdata.Category}
-                onChange={handleChnage}
+                value={formData.Category}
+                onChange={handleChange}
                 placeholder="Category"
                 required
-                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 border border-gray-300 rounded"
               />
               <select
                 name="Brand"
-                value={formdata.Brand}
-                onChange={handleChnage}
+                value={formData.Brand}
+                onChange={handleChange}
                 required
-                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 border border-gray-300 rounded"
               >
                 <option value="">Select Brand</option>
                 <option value="Adidas">Adidas</option>
@@ -154,27 +149,42 @@ export default function Product() {
               </select>
               <select
                 name="ProductType"
-                value={formdata.ProductType}
-                onChange={handleChnage}
+                value={formData.ProductType}
+                onChange={handleChange}
                 required
-                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 border border-gray-300 rounded"
               >
                 <option value="">Select Product Type</option>
                 <option value="Shoes">Shoes</option>
                 <option value="Clothing">Clothing</option>
                 <option value="Accessories">Accessories</option>
               </select>
+
+              {/* Auto Generate Checkbox */}
+              <div className="flex items-center pt-2">
+                <input
+                  type="checkbox"
+                  id="autoGenerate"
+                  checked={autoGenerate}
+                  onChange={(e) => setAutoGenerate(e.target.checked)}
+                  className="mr-2"
+                />
+                <label htmlFor="autoGenerate" className="text-sm text-gray-700">
+                  Auto Generate Product Code
+                </label>
+              </div>
+
               <div className="flex space-x-2 pt-2">
                 <button
                   type="submit"
-                  className="w-full bg-blue-600 text-white py-2 rounded-md hover:bg-blue-700 transition"
+                  className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700"
                 >
                   Submit
                 </button>
                 <button
                   type="button"
-                  onClick={() => setShowform(false)}
-                  className="w-full border border-gray-400 text-gray-700 py-2 rounded-md hover:bg-gray-100 transition"
+                  onClick={() => setShowForm(false)}
+                  className="w-full border border-gray-300 text-gray-700 py-2 rounded hover:bg-gray-100"
                 >
                   Cancel
                 </button>
