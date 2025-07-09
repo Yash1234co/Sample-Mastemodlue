@@ -14,6 +14,7 @@ export default function Product() {
   const [products, setProducts] = useState([]);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
+ 
   const navigate = useNavigate();
 
   const fetchProducts = async () => {
@@ -35,6 +36,7 @@ export default function Product() {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
+  
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
@@ -165,6 +167,8 @@ export default function Product() {
                 <option value="Shoes">Shoes</option>
                 <option value="Clothing">Clothing</option>
                 <option value="Accessories">Accessories</option>
+                
+
               </select>
 
               <div className="flex items-center pt-2">

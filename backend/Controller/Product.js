@@ -1,18 +1,18 @@
 const Products = require('../Models/Product');
+const Category=require('../Models/Category')
 
 
 const createProducts = async (req, res) => {
   try {
     const { ProductName, Category, Brand, ProductType, autoGenerate } = req.body;
 
-    if (!ProductName || !Category || !Brand || !ProductType) {
+    if (!ProductName || !Category || !Brand ) {
       return res.status(400).json({ message: 'All fields are required' });
     }
 
     let productCode;
 
     if (autoGenerate) {
-      // ✅ Use total count of products — regardless of code
       const totalCount = await Products.countDocuments();
       productCode = String(totalCount + 1).padStart(3, '0');
     }
@@ -22,7 +22,7 @@ const createProducts = async (req, res) => {
       Category,
       Brand,
       ProductType,
-      ...(autoGenerate && { productCode }) // Only include productCode if generated
+      ...(autoGenerate && { productCode }) 
     });
 
     await newProduct.save();
@@ -36,7 +36,6 @@ const createProducts = async (req, res) => {
 };
 
 
-// Get all products with optional filters
 const getproductrs = async (req, res) => {
   try {
     const { ProductName, Category, Brand, ProductType } = req.query;
@@ -55,5 +54,16 @@ const getproductrs = async (req, res) => {
   }
 };
 
+const getCategories=async(req,res)=>{
+    try{
+      const Categories=await Category.find().sort({name:1})
+      res.status(200).json(Categories)
+}
+catch(err){
+console.error("server error");
+res.status(500).json({message:"Featching Error",error:err.message})
+}
+}
+exports.getCategories=getCategories
 exports.createProducts=createProducts
 exports.getproductrs=getproductrs
