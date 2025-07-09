@@ -22,7 +22,7 @@ router.put('/updateimages/:imageId', upload.single('image'), UpdateImages.update
 
 router.post('/createProduct',Product.createProducts)
 router.get('/products',Product.getproductrs)
-router.get('/category',Product.getCategories)
+
 
 
 module.exports = router;

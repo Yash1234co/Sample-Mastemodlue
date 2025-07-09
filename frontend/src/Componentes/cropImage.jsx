@@ -6,7 +6,7 @@ export default function getCroppingImage(imageSrc, pixelCrop) {
     }
 
     const image = new Image();
-    image.crossOrigin = "anonymous"; // Prevent CORS issues
+    image.crossOrigin = "anonymous"; 
     image.src = imageSrc;
 
     image.onload = () => {

@@ -6,7 +6,7 @@ const createProducts = async (req, res) => {
   try {
     const { ProductName, Category, Brand, ProductType, autoGenerate } = req.body;
 
-    if (!ProductName || !Category || !Brand ) {
+    if (!ProductName || !Category || !Brand || !ProductType) {
       return res.status(400).json({ message: 'All fields are required' });
     }
 
@@ -54,16 +54,6 @@ const getproductrs = async (req, res) => {
   }
 };
 
-const getCategories=async(req,res)=>{
-    try{
-      const Categories=await Category.find().sort({name:1})
-      res.status(200).json(Categories)
-}
-catch(err){
-console.error("server error");
-res.status(500).json({message:"Featching Error",error:err.message})
-}
-}
-exports.getCategories=getCategories
+
 exports.createProducts=createProducts
 exports.getproductrs=getproductrs
