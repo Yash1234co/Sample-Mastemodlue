@@ -48,6 +48,11 @@ export default function Sidebar() {
           >
             Sample
           </button>
+          <button className="bg-slate-100 text-slate-900 font-semibold rounded-lg px-4 py-2 hover:bg-slate-700 hover:text-white transition-all duration-200"
+          onClick={()=> navigate('/System')}>
+            System Master
+          
+          </button>
 
           {error && <p className="text-red-400 text-sm text-center">{error}</p>}
         </div>

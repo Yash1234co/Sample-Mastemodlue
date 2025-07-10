@@ -9,6 +9,8 @@ const getImages = require('../Controller/getImages');
 const UpdateImages = require('../Controller/updateImages');
 const upload = require('../Middleware/Image');
 const Product= require('../Controller/Product')
+const Brand= require('../Controller/AddBrand')
+const ProductType=require('../Controller/AddProductType')
 
 router.post('/addsample', addsample.createSampleModule);
 router.get('/getData', getSample.getSamples);
@@ -22,6 +24,14 @@ router.put('/updateimages/:imageId', upload.single('image'), UpdateImages.update
 
 router.post('/createProduct',Product.createProducts)
 router.get('/products',Product.getproductrs)
+
+router.post('/createBrand',Brand.AddBrand)
+router.get('/getBrand',Brand.getBrands)
+
+router.post('/createProductType',ProductType.addproductType)
+router.get('/getProductType',ProductType.getProducts)
+
+
 
 
 

@@ -1,6 +1,4 @@
 const Products = require('../Models/Product');
-const Category=require('../Models/Category')
-
 
 const createProducts = async (req, res) => {
   try {
@@ -11,7 +9,6 @@ const createProducts = async (req, res) => {
     }
 
     let productCode;
-
     if (autoGenerate) {
       const totalCount = await Products.countDocuments();
       productCode = String(totalCount + 1).padStart(3, '0');
@@ -19,10 +16,10 @@ const createProducts = async (req, res) => {
 
     const newProduct = new Products({
       ProductName,
-      Category,
-      Brand,
+      Category,  
+      Brand,     
       ProductType,
-      ...(autoGenerate && { productCode }) 
+      ...(autoGenerate && { productCode })
     });
 
     await newProduct.save();
@@ -35,7 +32,6 @@ const createProducts = async (req, res) => {
   }
 };
 
-
 const getproductrs = async (req, res) => {
   try {
     const { ProductName, Category, Brand, ProductType } = req.query;
@@ -46,14 +42,17 @@ const getproductrs = async (req, res) => {
     if (Brand?.trim()) filter.Brand = Brand.trim();
     if (ProductType?.trim()) filter.ProductType = ProductType.trim();
 
-    const filteredData = await Products.find(filter);
+    const filteredData = await Products.find(filter)
+      .populate('Brand', 'name')           
+      .populate('ProductType', 'name');   
+
     res.status(200).json(filteredData);
+
   } catch (err) {
     console.error("Fetching error:", err.message);
     res.status(500).json({ message: 'Server error', error: err.message });
   }
 };
 
-
-exports.createProducts=createProducts
-exports.getproductrs=getproductrs
+exports.createProducts = createProducts;
+exports.getproductrs = getproductrs;

@@ -4,6 +4,7 @@ import AddCommentPage from "./Componentes/Comments";
 import SampleImageManager from "./Componentes/images";
 import Sidebar from "./Componentes/MasterModuleSidebar";
 import Product from "./Componentes/Product";
+import SystemMaster from "./Componentes/SystemMasterdata";
 
 export default function App() {
   return (
@@ -15,6 +16,7 @@ export default function App() {
           <Route path="/sample/:sampleId/comments" element={<AddCommentPage />} />
           <Route path="/sample/:sampleId/upload-image" element={<SampleImageManager />} /> 
           <Route path="/products" element={<Product/>}/>
+          <Route path="/System" element={<SystemMaster/>}/>
         </Routes>
       </div>
     </Router>
