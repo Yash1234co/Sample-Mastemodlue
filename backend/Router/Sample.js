@@ -11,6 +11,7 @@ const upload = require('../Middleware/Image');
 const Product= require('../Controller/Product')
 const Brand= require('../Controller/AddBrand')
 const ProductType=require('../Controller/AddProductType')
+const ProductCode=require('../Controller/getProduccode')
 
 router.post('/addsample', addsample.createSampleModule);
 router.get('/getData', getSample.getSamples);
@@ -31,6 +32,8 @@ router.get('/getBrand',Brand.getBrands)
 router.post('/createProductType',ProductType.addproductType)
 router.get('/getProductType',ProductType.getProducts)
 
+
+router.get('/getProductCode',ProductCode.getproductCode)
 
 
 

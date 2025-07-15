@@ -8,7 +8,7 @@ const addproductType = async (req, res) => {
         }
 
         const newProductType = new ProductType({
-            name,
+            name:req.body.name
         })
         const saveproductType = await newProductType.save()
         res.status(200).json({ message: "ProductType create Sucessfully", ProductTypes: saveproductType })

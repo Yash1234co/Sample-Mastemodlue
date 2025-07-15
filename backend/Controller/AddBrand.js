@@ -8,7 +8,7 @@ const AddBrand = async (req, res) => {
             return res.status(400).json({ message: "Add Brand Filed" })
         }
         const newBrand = new Brand({
-            name:name.trim()
+            name:req.body.name
         })
         const saveBrand = await newBrand.save()
         res.status(200).json({ message: "Brand Created Sucessfully", createBrand: saveBrand })

@@ -1,7 +1,10 @@
 const mongoose=require('mongoose')
 
 const productSchema=new mongoose.Schema({
-    name:{type:String}
+    name:{type:String,
+        trim:true,
+        unique:true
+    }
 
 },{timestamps:true})
 

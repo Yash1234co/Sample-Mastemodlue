@@ -5,9 +5,11 @@ import SampleImageManager from "./Componentes/images";
 import Sidebar from "./Componentes/MasterModuleSidebar";
 import Product from "./Componentes/Product";
 import SystemMaster from "./Componentes/SystemMasterdata";
+import { ProductContexts } from "./Componentes/ProductContext";
 
 export default function App() {
   return (
+    <ProductContexts>
     <Router>
       <div className="p-6">
         <Routes>
@@ -20,5 +22,7 @@ export default function App() {
         </Routes>
       </div>
     </Router>
+    </ProductContexts>
+ 
   );
 }

@@ -1,8 +1,8 @@
 
-
 import axios from "axios";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useProductContext } from "./ProductContext"; // import context
 
 export default function Product() {
   const [showForm, setShowForm] = useState(false);
@@ -12,7 +12,14 @@ export default function Product() {
     Brand: "",
     ProductType: "",
   });
-  const [autoGenerate, setAutoGenerate] = useState(false);
+
+  const {
+    autoGenerate,
+    setAutoGenerate,
+    productCode,
+    setProductCode,
+  } = useProductContext();
+
   const [products, setProducts] = useState([]);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
@@ -22,42 +29,26 @@ export default function Product() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    const fetchbrands = async () => {
+    const fetchBrands = async () => {
       try {
         const res = await axios.get("http://localhost:3000/getBrand");
-        if (res.status === 200) {
-          const data = res.data;
-          const brandarray = Array.isArray(data) ? data : data.brands || [];
-          setBrands(brandarray);
-        }
+        setBrands(Array.isArray(res.data) ? res.data : []);
       } catch (err) {
-        console.error("fetching brand error:", err);
         setError("Failed to fetch Brands");
       }
     };
 
-    fetchbrands();
-  }, []);
-
-  useEffect(() => {
     const fetchProductTypes = async () => {
       try {
         const res = await axios.get("http://localhost:3000/getProductType");
-        if (res.status === 200) {
-          const data = res.data;
-          const productTypeArray = Array.isArray(data.producttype)
-            ? data.producttype
-            : Array.isArray(data)
-              ? data
-              : [];
-          setProductType(productTypeArray);
-        }
+        const types = Array.isArray(res.data) ? res.data : [];
+        setProductType(types);
       } catch (err) {
-        console.error("Fetch product type error:", err);
         setError("Failed to fetch Product Types");
       }
     };
 
+    fetchBrands();
     fetchProductTypes();
   }, []);
 
@@ -66,7 +57,6 @@ export default function Product() {
       const res = await axios.get("http://localhost:3000/products");
       setProducts(Array.isArray(res.data) ? res.data : []);
     } catch (err) {
-      console.error("Error fetching products:", err.message);
       setError("Failed to fetch products");
     }
   };
@@ -81,30 +71,35 @@ export default function Product() {
   };
 
   const handleSubmit = async (e) => {
+    
     e.preventDefault();
     setError("");
     setSuccess("");
 
     try {
-      const payload = { ...formData, autoGenerate };
+      const payload = {
+        ...formData,
+        autoGenerate,
+        productCode: productCode || null,
+      };
+
       const res = await axios.post("http://localhost:3000/createProduct", payload);
+
       if (res.status === 200) {
         setSuccess("Product created successfully.");
         setFormData({ ProductName: "", Category: "", Brand: "", ProductType: "" });
-        setAutoGenerate(false);
+        setProductCode("");
         setShowForm(false);
-        fetchProducts(); // Refresh table
+        fetchProducts();
       }
     } catch (err) {
-      console.error("Error submitting:", err.response?.data || err.message);
-      const msg = err.response?.data?.message || "Failed to create product";
-      setError(msg);
+      setError(err.response?.data?.message || "Failed to create product");
     }
   };
 
   return (
     <>
-      {/* Header */}
+      {/* Navbar */}
       <header className="fixed top-0 left-0 w-full bg-blue-700 text-white shadow-md z-50">
         <div className="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
           <h1 className="text-xl font-bold">Product Manager</h1>
@@ -125,7 +120,7 @@ export default function Product() {
         </div>
       </header>
 
-      {/* Product Table */}
+      {/* Table */}
       <main className="pt-28 px-6">
         <div className="overflow-x-auto rounded-lg shadow border border-gray-300">
           <table className="min-w-full divide-y divide-gray-300 text-sm">
@@ -142,14 +137,11 @@ export default function Product() {
               {products.length > 0 ? (
                 products.map((product, i) => (
                   <tr key={i} className="hover:bg-gray-50">
-                    <td className="px-6 py-4">{product?.productCode || "—"}</td>
-                    <td className="px-6 py-4">{product?.ProductName}</td>
-                    <td className="px-6 py-4">{typeof product?.Category === "object" ? product?.Category?.name : product?.Category || "—"}</td>
-                    <td className="px-6 py-4">
-                      {typeof product?.Brand === "object" ? product.Brand.name : String(product.Brand || "—")}
-                    </td>
-
-                    <td className="px-6 py-4">{typeof product?.ProductType===Object ? product.ProductType.name : String(product.ProductType || "--")}</td>
+                    <td className="px-6 py-4">{product?.productCode?.code || "—"}</td>
+                    <td className="px-6 py-4">{product?.ProductName || "—"}</td>
+                    <td className="px-6 py-4">{product?.Category || "—"}</td>
+                    <td className="px-6 py-4">{product?.Brand?.name || "—"}</td>
+                    <td className="px-6 py-4">{product?.ProductType?.name || "—"}</td>
                   </tr>
                 ))
               ) : (
@@ -164,7 +156,7 @@ export default function Product() {
         </div>
       </main>
 
-      {/* Add Product Modal */}
+      {/* Modal */}
       {showForm && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
           <div className="bg-white p-6 rounded-xl shadow-md w-80">
@@ -190,6 +182,7 @@ export default function Product() {
                 required
                 className="w-full px-3 py-2 border border-gray-300 rounded"
               />
+
               <select
                 name="Brand"
                 value={formData.Brand}
@@ -200,10 +193,11 @@ export default function Product() {
                 <option value="">Select Brand</option>
                 {brands.map((brand) => (
                   <option value={brand._id} key={brand._id}>
-                    {brand?.name}
+                    {brand.name}
                   </option>
                 ))}
               </select>
+
               <select
                 name="ProductType"
                 value={formData.ProductType}
@@ -212,25 +206,30 @@ export default function Product() {
                 className="w-full px-3 py-2 border border-gray-300 rounded"
               >
                 <option value="">Select Product Type</option>
-                {productType.map((product) => (
-                  <option value={product._id} key={product._id}>
-                    {product?.name}
+                {productType.map((pt) => (
+                  <option value={pt._id} key={pt._id}>
+                    {pt.name}
                   </option>
                 ))}
               </select>
 
-              <div className="flex items-center pt-2">
+              {autoGenerate ? (
                 <input
-                  type="checkbox"
-                  id="autoGenerate"
-                  checked={autoGenerate}
-                  onChange={(e) => setAutoGenerate(e.target.checked)}
-                  className="mr-2"
+                  type="text"
+                  value={productCode}
+                  disabled
+                  className="w-full px-3 py-2 border border-gray-300 rounded bg-gray-100 text-gray-700"
                 />
-                <label htmlFor="autoGenerate" className="text-sm text-gray-700">
-                  Auto Generate Product Code
-                </label>
-              </div>
+              ) : (
+                <input
+                  type="text"
+                  value={productCode}
+                  onChange={(e) => setProductCode(e.target.value)}
+                  placeholder="Enter Product Code"
+                  required
+                  className="w-full px-3 py-2 border border-gray-300 rounded"
+                />
+              )}
 
               <div className="flex space-x-2 pt-2">
                 <button
@@ -254,6 +253,3 @@ export default function Product() {
     </>
   );
 }
-
-
-

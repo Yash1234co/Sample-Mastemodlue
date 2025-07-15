@@ -1,10 +1,11 @@
+
 import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import axios from "axios";
 
 export default function Sidebar() {
-  const [Products, SetProducts] = useState([]);
-  const [error, seterror] = useState("");
+  const [products, setProducts] = useState([]);
+  const [error, setError] = useState("");
 
   const navigate = useNavigate();
 
@@ -16,11 +17,11 @@ export default function Sidebar() {
         if (res.status === 200) {
           const data = res.data;
           const productArray = Array.isArray(data) ? data : data.Products || [];
-          SetProducts(productArray);
+          setProducts(productArray);
         }
       } catch (err) {
         console.error("Fetch error:", err);
-        seterror("Failed to fetch products");
+        setError("Failed to fetch products");
       }
     };
 
@@ -39,7 +40,7 @@ export default function Sidebar() {
             onClick={() => navigate("/products")}
           >
             Products{" "}
-            <span className="text-sm text-gray-500 ml-1">({Products.length})</span>
+            <span className="text-sm text-gray-500 ml-1">({products.length})</span>
           </button>
 
           <button
@@ -48,10 +49,12 @@ export default function Sidebar() {
           >
             Sample
           </button>
-          <button className="bg-slate-100 text-slate-900 font-semibold rounded-lg px-4 py-2 hover:bg-slate-700 hover:text-white transition-all duration-200"
-          onClick={()=> navigate('/System')}>
+
+          <button
+            className="bg-slate-100 text-slate-900 font-semibold rounded-lg px-4 py-2 hover:bg-slate-700 hover:text-white transition-all duration-200"
+            onClick={() => navigate("/System")}
+          >
             System Master
-          
           </button>
 
           {error && <p className="text-red-400 text-sm text-center">{error}</p>}
@@ -77,14 +80,18 @@ export default function Sidebar() {
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
-              {Array.isArray(Products) && Products.length > 0 ? (
-                Products.map((product, index) => (
+              {Array.isArray(products) && products.length > 0 ? (
+                products.map((product, index) => (
                   <tr key={index} className="hover:bg-gray-50">
-                    <td className="px-6 py-4">{product.productCode || "—"}</td>
+                    <td className="px-6 py-4">{product?.productCode?.code || "—"}</td>
                     <td className="px-6 py-4">{product.ProductName}</td>
                     <td className="px-6 py-4">{product.Category}</td>
-                    <td className="px-6 py-4">{product.Brand}</td>
-                    <td className="px-6 py-4">{product.ProductType}</td>
+                    <td className="px-6 py-4">
+                      {product.Brand?.name || product.Brand || "—"}
+                    </td>
+                    <td className="px-6 py-4">
+                      {product.ProductType?.name || product.ProductType || "—"}
+                    </td>
                   </tr>
                 ))
               ) : (

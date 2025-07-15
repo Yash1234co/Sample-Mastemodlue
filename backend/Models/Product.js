@@ -5,14 +5,9 @@ const productSchema = new mongoose.Schema({
     Category: {type:String},
     Brand:{type:mongoose.Schema.Types.ObjectId,ref:'Brand'},
     ProductType:{type:mongoose.Schema.Types.ObjectId,ref:'ProductType'},
-     productCode: {
-    type: String,
-    unique: true,
-    sparse:true
-  }
+     productCode: {type: mongoose.Schema.Types.ObjectId, ref: 'ProductCode'}
 
 },{timestamps:true})
 
 const Products = mongoose.model('Products', productSchema)
-
 module.exports = Products

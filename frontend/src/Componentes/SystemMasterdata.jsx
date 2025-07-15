@@ -1,448 +1,304 @@
-// import axios from "axios"
-// import { useEffect, useState } from "react"
-
-// export default function SystemMaster() {
-//     const [brands, setbrands] = useState([])
-//     const [error, setError] = useState('')
-//     const [brandname, setbrandname] = useState("")
-//     const [ShowForm, setShowForm] = useState(false)
-//     //  for Product type 
-//     const [productType, setproductType] = useState([])
-//     const [prodcttypename, setproductTypename] = useState("")
-//     const [showformType, setShowFormType] = useState(false)
-
-//     const fetchbrands = async () => {
-//         try {
-//             const res = await axios.get("http://localhost:3000/getBrand")
-//             if (res.status === 200) {
-//                 const data = res.data
-//                 const brandasarray = Array.isArray(data) ? data : data.brands || []
-//                 setbrands(brandasarray)
-//             }
-//         }
-//         catch (err) {
-//             console.error("Fetch error:", err);
-//             setError("Failed to fetch Brands");
-//         }
-//     }
-
-//     const fetchProductType = async () => {
-//         try {
-//             const res = await axios.get("http://localhost:3000/getProductType")
-//             if (res.status === 200) {
-//                 const data = res.data
-//                 const productTypearray = Array.isArray(data) ? data : data.prodcttypename || []
-//                 setproductType(productTypearray)
-
-//             }
-
-//         }
-//         catch (err) {
-//             console.error("Fetch error:", err);
-//             setError("Failed to fetch Products");
-//         }
-//     }
-
-//     useEffect(() => {
-//         fetchbrands()
-//         fetchProductType()
-//     }, [])
-
-//     const handlecancel = async () => {
-//         setShowForm(false)
-//         setbrandname("")
-//         setError("")
-//     }
-//     const handleProductType = async () => {
-//         setShowFormType(false)
-//         setproductTypename("")
-//         setError("")
-//     }
-
-//     const addBrand = async () => {
-//         try {
-//             const res = await axios.post("http://localhost:3000/createBrand", {
-//                 name: brandname.trim()
-//             })
-//             const newBrand = res.data.brand || res.data.createBrand
-//             setbrands((prev) => [...prev, newBrand])
-//             setbrandname("")
-//             setShowForm(false)
-//         }
-//         catch (err) {
-//             console.error("Fetch error:", err);
-//             setError("Failed to fetch Brands");
-//         }
-//     }
-
-//     const addProductType = async () => {
-//         try {
-//             const res = await axios.post("http://localhost:3000/createProductType", {
-//                 name: prodcttypename.trim()
-//             })
-//             const newProductType = res.data.producttype || res.data.createproductType
-//             setproductType((prev) => [...prev, newProductType])
-//             setproductTypename("")
-//             setShowFormType(false)
-
-//         }
-//         catch (err) {
-//             console.error("Fetch error:", err);
-//             setError("Failed to fetch Brands");
-//         }
-//     }
-//     return (
-//         <>
-//             <div className="flex flex-wrap justify-center gap-6 mt-10">
-//                 <div className="w-full md:w-[300px] border rounded shadow-md">
-
-//                     <div className="flex justify-between items-center px-4 py-2 border-b bg-gray-300">
-//                         <h2 className="font-semibold ">Brands</h2>
-
-//                         <button className="text-xl font-bold  hover:text-white"
-//                             onClick={() => setShowForm((prev) => !prev)}>+</button>
-
-//                     </div>
-//                     <div className=" flex items-center justify-center">
-//                         {error && <p className="font-semibold text-red-600">{error}</p>}
-//                     </div>
-
-//                     <div className="px-3 py-2">
-//                         <div className="grid gap-2">
-//                             {Array.isArray(brands) && brands.map((brand) => (
-//                                 <div key={brand._id}
-//                                     className="p-3 border-b rounded bg-gray-100 shadow-sm">
-//                                     {brand.name}
-//                                 </div>
-//                             ))}
-//                         </div>
-
-//                     </div>
-//                     {ShowForm && (
-//                         <div className="flex items-center gap-2 px-3 py-2">
-//                             <input
-//                                 type="text"
-//                                 className="flex-1 px-3 py-2 border rounded"
-//                                 placeholder="Enter the Brand name"
-//                                 value={brandname}
-//                                 onChange={(e) => {
-//                                     setbrandname(e.target.value);
-//                                     if (error) setError("");
-//                                 }}
-//                             />
-//                         </div>
-//                     )}
-//                     <div className="flex space-y-2 gap-2">
-//                         <button
-//                             onClick={addBrand}
-//                             className="flex-1 px-3 py-2 rounded bg-blue-600 text-white hover:bg-blue-700 transition">
-//                             save
-//                         </button>
-
-//                         <button
-//                             onClick={handlecancel}
-//                             className="flex-1 px-3 py-2 rounded bg-gray-200 hover:bg-gray-300 transition ">
-//                             cancel
-//                         </button>
-//                     </div>
-//                 </div>
-//                 {/* {for Product Type} */}
-//                 <div className="w-full md:w-[300px] border rounded shadow-md bg-white">
-//                     {/* Header */}
-//                     <div className="flex justify-between items-center px-4 py-2 border-b bg-gray-300">
-//                         <h2 className="font-semibold">Product Type</h2>
-//                         <button
-//                             className="text-xl font-bold hover:text-white hover:bg-gray-600 transition px-2 py-1 rounded"
-//                             onClick={() => setShowFormType((prev) => !prev)}
-//                         >
-//                             +
-//                         </button>
-//                     </div>
-//                     <div className="px-3 py-2">
-//                         <div className="grid gap-2">
-//                             {Array.isArray(productType) &&
-//                                 productType
-//                                     .filter((product) => product && product.name && product._id)
-//                                     .map((product) => (
-//                                         <div key={product._id} className="p-3 border-b rounded bg-gray-100 shadow-sm">
-//                                             {product.name}
-//                                         </div>
-//                                     ))}
-
-//                         </div>
-//                     </div>
-
-//                     {showformType && (
-//                         <div className="p-4 space-y-4">
-//                             <input
-//                                 type="text"
-//                                 className="w-full px-3 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-//                                 value={prodcttypename}
-//                                 onChange={(e) => {
-//                                     setproductTypename(e.target.value);
-//                                     if (error) setError("");
-//                                 }}
-//                                 placeholder="Enter the product type"
-//                             />
-
-//                             <div className="flex gap-3">
-//                                 <button
-//                                     onClick={addProductType}
-//                                     className="flex-1 px-3 py-2 rounded bg-blue-600 text-white hover:bg-blue-700 transition"
-//                                 >
-//                                     Save
-//                                 </button>
-
-//                                 <button
-//                                     onClick={handleProductType}
-//                                     className="flex-1 px-3 py-2 rounded bg-gray-200 hover:bg-gray-300 transition"
-//                                 >
-//                                     Cancel
-//                                 </button>
-//                             </div>
-//                         </div>
-//                     )}
-//                 </div>
-
-//             </div>
-//         </>
-//     )
-// }
-
-
 
 import axios from "axios";
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { useProductContext } from "./ProductContext";
 
 export default function SystemMaster() {
-    const [brands, setbrands] = useState([]);
-    const [error, setError] = useState("");
-    const [brandname, setbrandname] = useState("");
-    const [ShowForm, setShowForm] = useState(false);
+  const [brands, setbrands] = useState([]);
+  const [error, setError] = useState("");
+  const [brandname, setbrandname] = useState("");
+  const [ShowForm, setShowForm] = useState(false);
 
-    const [productType, setproductType] = useState([]);
-    const [prodcttypename, setproductTypename] = useState("");
-    const [showformType, setShowFormType] = useState(false);
+  const [productType, setproductType] = useState([]);
+  const [prodcttypename, setproductTypename] = useState("");
+  const [showformType, setShowFormType] = useState(false);
 
-    // Fetch all brands
-    const fetchbrands = async () => {
+  const [isExpandedBrand, setIsExpandedBrand] = useState(true);
+  const [isExpandedProductType, setIsExpandedProductType] = useState(true);
+
+  const { autoGenerate, setAutoGenerate, productCode, setProductCode } = useProductContext();
+  const [loadingCode, setLoadingCode] = useState(false);
+
+  const navigate = useNavigate();
+
+  const fetchbrands = async () => {
+    try {
+      const res = await axios.get("http://localhost:3000/getBrand");
+      const data = res.data;
+      const brandasarray = Array.isArray(data.brands) ? data.brands : Array.isArray(data) ? data : [];
+      setbrands(brandasarray);
+    } catch (err) {
+      console.error("Fetch error:", err);
+      setError("Failed to fetch Brands");
+    }
+  };
+
+  const fetchProductType = async () => {
+    try {
+      const res = await axios.get("http://localhost:3000/getProductType");
+      const data = res.data;
+      const productTypearray = Array.isArray(data.producttype) ? data.producttype : Array.isArray(data) ? data : [];
+      setproductType(productTypearray);
+    } catch (err) {
+      console.error("Fetch error:", err);
+      setError("Failed to fetch Product Types");
+    }
+  };
+
+  useEffect(() => {
+    fetchbrands();
+    fetchProductType();
+  }, []);
+
+  useEffect(() => {
+    const fetchProductCode = async () => {
+      if (autoGenerate) {
+        setLoadingCode(true);
         try {
-            const res = await axios.get("http://localhost:3000/getBrand");
-            if (res.status === 200) {
-                const data = res.data;
-                const brandasarray = Array.isArray(data.brands)
-                    ? data.brands
-                    : Array.isArray(data)
-                        ? data
-                        : [];
-                setbrands(brandasarray);
-            }
+          const res = await axios.get("http://localhost:3000/getProductCode");
+          setProductCode(res.data.code);
+          setError("");
         } catch (err) {
-            console.error("Fetch error:", err);
-            setError("Failed to fetch Brands");
+          console.error("Error fetching product code:", err);
+          setError("Failed to generate product code");
+        } finally {
+          setLoadingCode(false);
         }
+      } else {
+        setProductCode("");
+      }
     };
+    fetchProductCode();
+  }, [autoGenerate, setProductCode]);
 
-    // Fetch all product types
-    const fetchProductType = async () => {
-        try {
-            const res = await axios.get("http://localhost:3000/getProductType");
-            if (res.status === 200) {
-                const data = res.data;
-                const productTypearray = Array.isArray(data.producttype)
-                    ? data.producttype
-                    : Array.isArray(data)
-                        ? data
-                        : [];
-                setproductType(productTypearray);
-            }
-        } catch (err) {
-            console.error("Fetch error:", err);
-            setError("Failed to fetch Products");
-        }
-    };
-
-    useEffect(() => {
+  const addBrand = async () => {
+    try {
+      const res = await axios.post("http://localhost:3000/createBrand", {
+        name: brandname.trim(),
+      });
+      const newBrand = res.data.brand || res.data.createBrand;
+      if (newBrand && newBrand.name && newBrand._id) {
+        setbrands((prev) => [...prev, newBrand]);
+      } else {
         fetchbrands();
-        fetchProductType();
-    }, []);
+      }
+      setbrandname("");
+      setShowForm(false);
+    } catch (err) {
+      console.error("Add Brand Error:", err);
+      setError("Failed to add Brand");
+    }
+  };
 
-    // Reset brand form
-    const handlecancel = () => {
-        setShowForm(false);
-        setbrandname("");
-        setError("");
-    };
+  const addProductType = async () => {
+    try {
+      await axios.post("http://localhost:3000/createProductType", {
+        name: prodcttypename.trim(),
+      });
+      await fetchProductType();
+      setproductTypename("");
+      setShowFormType(false);
+    } catch (err) {
+      console.error("Add Product Type Error:", err);
+      setError("Failed to add Product Type");
+    }
+  };
 
-    // Reset product type form
-    const handleProductType = () => {
-        setShowFormType(false);
-        setproductTypename("");
-        setError("");
-    };
+  const handlecancel = () => {
+    setShowForm(false);
+    setbrandname("");
+    setError("");
+  };
 
-    // Add brand
-    const addBrand = async () => {
-        try {
-            const res = await axios.post("http://localhost:3000/createBrand", {
-                name: brandname.trim(),
-            });
-            const newBrand = res.data.brand || res.data.createBrand;
-            if (newBrand && newBrand.name && newBrand._id) {
-                setbrands((prev) => [...prev, newBrand]);
-            } else {
-                fetchbrands(); // fallback if response is not proper
-            }
-            setbrandname("");
-            setShowForm(false);
-        } catch (err) {
-            console.error("Fetch error:", err);
-            setError("Failed to add Brand");
-        }
-    };
+  const handleProductType = () => {
+    setShowFormType(false);
+    setproductTypename("");
+    setError("");
+  };
 
-    // Add product type
-    const addProductType = async () => {
-        try {
-            await axios.post("http://localhost:3000/createProductType", {
-                name: prodcttypename.trim(),
-            });
-            await fetchProductType(); // re-fetch to get updated list
-            setproductTypename("");
-            setShowFormType(false);
-        } catch (err) {
-            console.error("Fetch error:", err);
-            setError("Failed to add Product Type");
-        }
-    };
-
-    return (
-        <div className="flex flex-wrap justify-center gap-6 mt-10">
-            {/* Brand Card */}
-            <div className="w-full md:w-[300px] border rounded shadow-md bg-white">
-                <div className="flex justify-between items-center px-4 py-2 border-b bg-gray-300">
-                    <h2 className="font-semibold">Brands</h2>
-                    <button
-                        className="text-xl font-bold hover:text-white hover:bg-gray-600 transition px-2 py-1 rounded"
-                        onClick={() => setShowForm((prev) => !prev)}
-                    >
-                        +
-                    </button>
-                </div>
-
-                {error && (
-                    <div className="px-4 py-2 text-red-600 font-semibold">{error}</div>
-                )}
-
-                <div className="px-3 py-2">
-                    <div className="grid gap-2">
-                        {Array.isArray(brands) &&
-                            brands
-                                .filter((b) => b && b.name && b._id)
-                                .map((brand) => (
-                                    <div
-                                        key={brand._id}
-                                        className="p-3 border-b rounded bg-gray-100 shadow-sm"
-                                    >
-                                        {brand.name}
-                                    </div>
-                                ))}
-                    </div>
-                </div>
-
-                {ShowForm && (
-                    <div className="flex items-center gap-2 px-3 py-2">
-                        <input
-                            type="text"
-                            className="flex-1 px-3 py-2 border rounded"
-                            placeholder="Enter the Brand name"
-                            value={brandname}
-                            onChange={(e) => {
-                                setbrandname(e.target.value);
-                                if (error) setError("");
-                            }}
-                        />
-                    </div>
-                )}
-
-                <div className="flex justify-between gap-2 px-3 py-2">
-                    <button
-                        onClick={addBrand}
-                        className="px-4 py-2 rounded bg-blue-600 text-white hover:bg-blue-700 transition"
-                    >
-                        Save
-                    </button>
-
-                    <button
-                        onClick={handlecancel}
-                        className="px-4 py-2 rounded bg-gray-200 hover:bg-gray-300 transition"
-                    >
-                        Cancel
-                    </button>
-                </div>
-
-            </div>
-
-            {/* Product Type Card */}
-            <div className="w-full md:w-[300px] border rounded shadow-md bg-white">
-                <div className="flex justify-between items-center px-4 py-2 border-b bg-gray-300">
-                    <h2 className="font-semibold">Product Type</h2>
-                    <button
-                        className="text-xl font-bold hover:text-white hover:bg-gray-600 transition px-2 py-1 rounded"
-                        onClick={() => setShowFormType((prev) => !prev)}
-                    >
-                        +
-                    </button>
-                </div>
-
-                <div className="px-3 py-2">
-                    <div className="grid gap-2">
-                        {Array.isArray(productType) &&
-                            productType
-                                .filter((p) => p && p.name && p._id)
-                                .map((product) => (
-                                    <div
-                                        key={product._id}
-                                        className="p-3 border-b rounded bg-gray-100 shadow-sm"
-                                    >
-                                        {product.name}
-                                    </div>
-                                ))}
-                    </div>
-                </div>
-
-                {showformType && (
-                    <div className="p-4 space-y-4">
-                        <input
-                            type="text"
-                            className="w-full px-3 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-                            value={prodcttypename}
-                            onChange={(e) => {
-                                setproductTypename(e.target.value);
-                                if (error) setError("");
-                            }}
-                            placeholder="Enter the product type"
-                        />
-
-                       
-                    </div>
-                )}
-                 <div className="flex justify-between gap-2 px-3 py-2">
-                            <button
-                                onClick={addProductType}
-                                className="px-4 py-2 rounded bg-blue-600 text-white hover:bg-blue-700 transition"
-                            >
-                                Save
-                            </button>
-
-                            <button
-                                onClick={handleProductType}
-                                className="px-4 py-2 rounded bg-gray-200 hover:bg-gray-300 transition"
-                            >
-                                Cancel
-                            </button>
-                        </div>
-            </div>
+  return (
+    <>
+      {/* Navbar */}
+      <header className="fixed top-0 left-0 w-full bg-blue-700 text-white z-50 shadow-md">
+        <div className="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
+          <button
+            onClick={() => navigate(-1)}
+            className="text-white bg-blue-600 px-3 py-1 rounded hover:bg-blue-800"
+          >
+            ← Back
+          </button>
+          <h1 className="text-lg font-bold">System Master</h1>
+          <div></div>
         </div>
-    );
+      </header>
+
+      {/* Content */}
+      <div className="pt-24 px-4">
+        <div className="flex flex-wrap justify-center gap-6">
+
+          {/* Brand Card */}
+          <div className="w-full md:w-[320px] border rounded shadow bg-white">
+            <div className="flex justify-between items-center px-4 py-3 bg-gray-200 border-b">
+              <h2 className="text-lg font-semibold">Brands</h2>
+              <div className="flex gap-2">
+                <button
+                  onClick={() => setShowForm((prev) => !prev)}
+                  className="text-xl font-bold px-2 py-1 rounded hover:bg-gray-400 transition"
+                >
+                  +
+                </button>
+                <button
+                  onClick={() => setIsExpandedBrand((prev) => !prev)}
+                  className="text-lg transform transition-transform"
+                  style={{ transform: isExpandedBrand ? "rotate(0deg)" : "rotate(180deg)" }}
+                >
+                  ▲
+                </button>
+              </div>
+            </div>
+
+            {isExpandedBrand && (
+              <div className="px-4 py-2 space-y-2">
+                {brands.map((brand) => (
+                  <div key={brand._id} className="p-2 bg-gray-100 border rounded shadow-sm">
+                    {brand.name}
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {ShowForm && (
+              <div className="px-4 py-2">
+                <input
+                  type="text"
+                  className="w-full px-3 py-2 border rounded focus:outline-none"
+                  placeholder="Enter Brand name"
+                  value={brandname}
+                  onChange={(e) => {
+                    setbrandname(e.target.value);
+                    if (error) setError("");
+                  }}
+                />
+              </div>
+            )}
+
+            <div className="flex justify-end gap-2 px-4 py-2">
+              <button
+                onClick={addBrand}
+                className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition"
+              >
+                Save
+              </button>
+              <button
+                onClick={handlecancel}
+                className="bg-gray-200 px-4 py-2 rounded hover:bg-gray-300 transition"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+
+          {/* Product Type Card */}
+          <div className="w-full md:w-[320px] border rounded shadow bg-white">
+            <div className="flex justify-between items-center px-4 py-3 bg-gray-200 border-b">
+              <h2 className="text-lg font-semibold">Product Type</h2>
+              <div className="flex gap-2">
+                <button
+                  onClick={() => setShowFormType((prev) => !prev)}
+                  className="text-xl font-bold px-2 py-1 rounded hover:bg-gray-400 transition"
+                >
+                  +
+                </button>
+                <button
+                  onClick={() => setIsExpandedProductType((prev) => !prev)}
+                  className="text-lg transform transition-transform"
+                  style={{ transform: isExpandedProductType ? "rotate(0deg)" : "rotate(180deg)" }}
+                >
+                  ▲
+                </button>
+              </div>
+            </div>
+
+            {isExpandedProductType && (
+              <div className="px-4 py-2 space-y-2">
+                {productType.map((type) => (
+                  <div key={type._id} className="p-2 bg-gray-100 border rounded shadow-sm">
+                    {type.name}
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {showformType && (
+              <div className="px-4 py-2">
+                <input
+                  type="text"
+                  className="w-full px-3 py-2 border rounded focus:outline-none"
+                  placeholder="Enter Product Type"
+                  value={prodcttypename}
+                  onChange={(e) => {
+                    setproductTypename(e.target.value);
+                    if (error) setError("");
+                  }}
+                />
+              </div>
+            )}
+
+            <div className="flex justify-end gap-2 px-4 py-2">
+              <button
+                onClick={addProductType}
+                className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition"
+              >
+                Save
+              </button>
+              <button
+                onClick={handleProductType}
+                className="bg-gray-200 px-4 py-2 rounded hover:bg-gray-300 transition"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+
+          {/* Auto Product Code Card (Switch Inside Card Body) */}
+          <div className="w-full md:w-[320px] border rounded shadow bg-white">
+            <div className="px-4 py-4">
+              <h2 className="text-lg font-semibold mb-3">Auto Product Code</h2>
+
+              <div className="flex items-center justify-between mb-4">
+                <span className="text-sm text-gray-700">Enable Auto Generate</span>
+                <label className="inline-flex items-center cursor-pointer">
+                  <input
+                    type="checkbox"
+                    className="sr-only peer"
+                    checked={autoGenerate}
+                    onChange={() => setAutoGenerate((prev) => !prev)}
+                  />
+                  <div className="w-11 h-6 bg-gray-300 rounded-full peer peer-checked:bg-blue-600 relative transition">
+                    <div className="absolute left-1 top-1 w-4 h-4 bg-white rounded-full transition-transform peer-checked:translate-x-5"></div>
+                  </div>
+                </label>
+              </div>
+
+              {autoGenerate && (
+                <>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Preview Code</label>
+                  <input
+                    type="text"
+                    className="w-full px-3 py-2 border rounded bg-gray-100 text-gray-900"
+                    value={productCode}
+                    readOnly
+                  />
+                  {loadingCode && <p className="text-blue-500 text-sm mt-1">Generating code...</p>}
+                  {error && <p className="text-red-600 text-sm mt-1">{error}</p>}
+                </>
+              )}
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </>
+  );
 }
