@@ -7,7 +7,11 @@ const brandSchema = new mongoose.Schema(
       required: true,
       unique: true,
       trim: true
-    }
+    },
+    shortname:{
+      type:String,
+     },
+    
   },
   { timestamps: true }
 );

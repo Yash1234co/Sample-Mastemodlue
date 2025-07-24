@@ -28,12 +28,15 @@ router.get('/products',Product.getproductrs)
 
 router.post('/createBrand',Brand.AddBrand)
 router.get('/getBrand',Brand.getBrands)
+router.put('/updateBrand/:id', Brand.updateBrand);
 
 router.post('/createProductType',ProductType.addproductType)
 router.get('/getProductType',ProductType.getProducts)
-
+router.put('/updateProduct',Product.updateProducts)
+router.put('/updateProductType/:id', ProductType.updateProductType);
 
 router.get('/getProductCode',ProductCode.getproductCode)
+
 
 
 

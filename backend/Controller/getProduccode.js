@@ -1,3 +1,4 @@
+
 const Products=require('../Models/Product')
 
 const getproductCode=async(req,res)=>{

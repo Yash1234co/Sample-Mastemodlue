@@ -4,6 +4,9 @@ const productSchema=new mongoose.Schema({
     name:{type:String,
         trim:true,
         unique:true
+    },
+    shortname:{
+        type:String
     }
 
 },{timestamps:true})

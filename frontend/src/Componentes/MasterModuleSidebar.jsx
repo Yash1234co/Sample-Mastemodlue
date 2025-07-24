@@ -7,6 +7,7 @@ export default function Sidebar() {
   const [products, setProducts] = useState([]);
   const [error, setError] = useState("");
 
+
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -82,8 +83,16 @@ export default function Sidebar() {
             <tbody className="bg-white divide-y divide-gray-200">
               {Array.isArray(products) && products.length > 0 ? (
                 products.map((product, index) => (
+
+
                   <tr key={index} className="hover:bg-gray-50">
-                    <td className="px-6 py-4">{product?.productCode?.code || "—"}</td>
+                    <td className="px-6 py-4">
+                      {product?.productCode?.code || "—"}{" "}
+                      <span className="text-xs text-gray-500 ml-1">
+                        ({product?.productCode?.shortname}-{product?.productCode?.ShortName})
+                      </span>
+                    </td>
+
                     <td className="px-6 py-4">{product.ProductName}</td>
                     <td className="px-6 py-4">{product.Category}</td>
                     <td className="px-6 py-4">

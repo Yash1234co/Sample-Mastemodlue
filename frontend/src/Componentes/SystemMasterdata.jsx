@@ -3,15 +3,19 @@ import axios from "axios";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useProductContext } from "./ProductContext";
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 export default function SystemMaster() {
   const [brands, setbrands] = useState([]);
   const [error, setError] = useState("");
   const [brandname, setbrandname] = useState("");
+  const [brandShortname, setbrandShortName] = useState("");
   const [ShowForm, setShowForm] = useState(false);
 
   const [productType, setproductType] = useState([]);
-  const [prodcttypename, setproductTypename] = useState("");
+  const [productTypename, setproductTypename] = useState("");
+  const [shortProductTypeName, setShortproductTypeName] = useState("");
   const [showformType, setShowFormType] = useState(false);
 
   const [isExpandedBrand, setIsExpandedBrand] = useState(true);
@@ -19,6 +23,12 @@ export default function SystemMaster() {
 
   const { autoGenerate, setAutoGenerate, productCode, setProductCode } = useProductContext();
   const [loadingCode, setLoadingCode] = useState(false);
+  const [selectedBrandId, setSelectedBrandId] = useState("");
+  const [selectedTypeId, setSelectedTypeId] = useState("");
+  const [editingShortnames, setEditingShortnames] = useState({});
+  const [editingTypeShortnames, setEditingTypeShortnames] = useState({});
+
+
 
   const navigate = useNavigate();
 
@@ -52,6 +62,23 @@ export default function SystemMaster() {
   }, []);
 
   useEffect(() => {
+    if (autoGenerate) {
+      if (brands.length > 0) {
+        const lastBrand = brands[brands.length - 1];
+        setSelectedBrandId(lastBrand._id);
+      }
+      if (productType.length > 0) {
+        const lastType = productType[productType.length - 1];
+        setSelectedTypeId(lastType._id);
+      }
+    } else {
+      setProductCode("");
+      setSelectedBrandId("");
+      setSelectedTypeId("");
+    }
+  }, [autoGenerate, brands, productType]);
+
+  useEffect(() => {
     const fetchProductCode = async () => {
       if (autoGenerate) {
         setLoadingCode(true);
@@ -74,16 +101,20 @@ export default function SystemMaster() {
 
   const addBrand = async () => {
     try {
-      const res = await axios.post("http://localhost:3000/createBrand", {
-        name: brandname.trim(),
-      });
-      const newBrand = res.data.brand || res.data.createBrand;
-      if (newBrand && newBrand.name && newBrand._id) {
-        setbrands((prev) => [...prev, newBrand]);
-      } else {
-        fetchbrands();
-      }
+      const trimmedName = brandname.trim();
+      if (!trimmedName) return toast.error("Brand name cannot be empty");
+
+      const payload = {
+        name: trimmedName,
+        shortname: brandShortname.trim()
+      };
+
+      await axios.post("http://localhost:3000/createBrand", payload);
+
+      await fetchbrands(); // <-- THIS ENSURES shortname is retrieved from DB
+
       setbrandname("");
+      setbrandShortName("");
       setShowForm(false);
     } catch (err) {
       console.error("Add Brand Error:", err);
@@ -91,13 +122,22 @@ export default function SystemMaster() {
     }
   };
 
+
+
   const addProductType = async () => {
     try {
-      await axios.post("http://localhost:3000/createProductType", {
-        name: prodcttypename.trim(),
-      });
+      const payload = {
+        name: productTypename.trim(),
+      };
+
+      if (shortProductTypeName.trim()) {
+        payload.shortname = shortProductTypeName.trim();
+      }
+
+      await axios.post("http://localhost:3000/createProductType", payload);
       await fetchProductType();
       setproductTypename("");
+      setShortproductTypeName("");
       setShowFormType(false);
     } catch (err) {
       console.error("Add Product Type Error:", err);
@@ -105,21 +145,56 @@ export default function SystemMaster() {
     }
   };
 
-  const handlecancel = () => {
-    setShowForm(false);
-    setbrandname("");
-    setError("");
+ 
+  const handleShortNameSave = async (brand) => {
+    try {
+      await axios.put(`http://localhost:3000/updateBrand/${brand._id}`, {
+        shortname: brand.shortname,
+      });
+
+      toast.success("Short name saved!");
+
+      // Clear editing state for this brand
+      setEditingShortnames((prev) => {
+        const updated = { ...prev };
+        delete updated[brand._id];
+        return updated;
+      });
+
+      // Refresh list to reflect new state
+      await fetchbrands();
+    } catch (error) {
+      console.error("Error saving short name:", error);
+      toast.error("Failed to save short name");
+    }
   };
 
-  const handleProductType = () => {
-    setShowFormType(false);
-    setproductTypename("");
-    setError("");
+  const handleProductTypeShortNameSave = async (type) => {
+    try {
+      await axios.put(`http://localhost:3000/updateProductType/${type._id}`, {
+        shortname: type.shortname,
+      });
+
+      toast.success("Product Type short name saved!");
+
+      setEditingTypeShortnames((prev) => {
+        const updated = { ...prev };
+        delete updated[type._id];
+        return updated;
+      });
+
+      await fetchProductType();
+    } catch (err) {
+      console.error(err);
+      toast.error("Failed to save Product Type short name.");
+    }
   };
+
 
   return (
     <>
-      {/* Navbar */}
+      <ToastContainer position="top-right" autoClose={3000} />
+
       <header className="fixed top-0 left-0 w-full bg-blue-700 text-white z-50 shadow-md">
         <div className="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
           <button
@@ -133,135 +208,198 @@ export default function SystemMaster() {
         </div>
       </header>
 
-      {/* Content */}
       <div className="pt-24 px-4">
         <div className="flex flex-wrap justify-center gap-6">
 
-          {/* Brand Card */}
+          {/* Brands */}
           <div className="w-full md:w-[320px] border rounded shadow bg-white">
             <div className="flex justify-between items-center px-4 py-3 bg-gray-200 border-b">
               <h2 className="text-lg font-semibold">Brands</h2>
               <div className="flex gap-2">
-                <button
-                  onClick={() => setShowForm((prev) => !prev)}
-                  className="text-xl font-bold px-2 py-1 rounded hover:bg-gray-400 transition"
-                >
-                  +
-                </button>
-                <button
-                  onClick={() => setIsExpandedBrand((prev) => !prev)}
-                  className="text-lg transform transition-transform"
-                  style={{ transform: isExpandedBrand ? "rotate(0deg)" : "rotate(180deg)" }}
-                >
-                  ▲
-                </button>
+                <button onClick={() => setShowForm((prev) => !prev)} className="text-xl font-bold px-2 py-1 rounded hover:bg-gray-400 transition">+</button>
+                <button onClick={() => setIsExpandedBrand((prev) => !prev)} className="text-lg transition-transform" style={{ transform: isExpandedBrand ? "rotate(0deg)" : "rotate(180deg)" }}>▲</button>
               </div>
             </div>
 
             {isExpandedBrand && (
               <div className="px-4 py-2 space-y-2">
                 {brands.map((brand) => (
-                  <div key={brand._id} className="p-2 bg-gray-100 border rounded shadow-sm">
-                    {brand.name}
+                  <div
+                    key={brand._id}
+                    className="p-2 bg-gray-100 border rounded shadow-sm flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2"
+                  >
+                    <div className="flex items-center gap-4 w-full justify-between">
+                      {/* Brand Name on the left */}
+                      <span className="font-medium">{brand.name}</span>
+
+                      {/* Shortname or Input on the right */}
+                      {brand.shortname ? (
+                        <span className="text-gray-600">{brand.shortname}</span>
+                      ) : (
+                        <div className="flex gap-2">
+                          <input
+                            type="text"
+                            value={editingShortnames[brand._id] || ""}
+                            onChange={(e) =>
+                              setEditingShortnames((prev) => ({
+                                ...prev,
+                                [brand._id]: e.target.value,
+                              }))
+                            }
+                            placeholder="Shortname"
+                            className="border rounded px-2 py-1 text-sm w-[100px] sm:w-[120px]"
+                          />
+                          <button
+                            onClick={() =>
+                              handleShortNameSave(
+                                { ...brand, shortname: editingShortnames[brand._id] || "" },
+                                true
+                              )
+                            }
+                            className="bg-blue-500 text-white px-2 py-1 text-sm rounded"
+                          >
+                            Save
+                          </button>
+                        </div>
+                      )}
+
+                    </div>
                   </div>
                 ))}
+
+
               </div>
             )}
 
             {ShowForm && (
               <div className="px-4 py-2">
-                <input
-                  type="text"
-                  className="w-full px-3 py-2 border rounded focus:outline-none"
-                  placeholder="Enter Brand name"
-                  value={brandname}
-                  onChange={(e) => {
-                    setbrandname(e.target.value);
-                    if (error) setError("");
-                  }}
-                />
+                <div className="flex gap-2 items-center">
+                  <input
+                    type="text"
+                    className="flex-1 px-3 py-2 border rounded"
+                    placeholder="Enter Brand name"
+                    value={brandname}
+                    onChange={(e) => {
+                      setbrandname(e.target.value);
+                      if (error) setError("");
+                    }}
+                  />
+                  <input
+                    type="text"
+                    className="w-[100px] px-3 py-2 border rounded"
+                    placeholder="Short (optional)"
+                    value={brandShortname}
+                    onChange={(e) => setbrandShortName(e.target.value)}
+                  />
+                </div>
+
+                <div className="flex justify-end gap-2 mt-2">
+                  <button
+                    onClick={addBrand}
+                    className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition"
+                  >
+                    Save
+                  </button>
+                  <button
+                    onClick={() => {
+                      setShowForm(false);
+                      setbrandname("");
+                      setbrandShortName("");
+                    }}
+                    className="bg-gray-200 px-4 py-2 rounded hover:bg-gray-300 transition"
+                  >
+                    Cancel
+                  </button>
+                </div>
               </div>
             )}
 
-            <div className="flex justify-end gap-2 px-4 py-2">
-              <button
-                onClick={addBrand}
-                className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition"
-              >
-                Save
-              </button>
-              <button
-                onClick={handlecancel}
-                className="bg-gray-200 px-4 py-2 rounded hover:bg-gray-300 transition"
-              >
-                Cancel
-              </button>
-            </div>
           </div>
 
-          {/* Product Type Card */}
+          {/* Product Type */}
           <div className="w-full md:w-[320px] border rounded shadow bg-white">
             <div className="flex justify-between items-center px-4 py-3 bg-gray-200 border-b">
               <h2 className="text-lg font-semibold">Product Type</h2>
               <div className="flex gap-2">
-                <button
-                  onClick={() => setShowFormType((prev) => !prev)}
-                  className="text-xl font-bold px-2 py-1 rounded hover:bg-gray-400 transition"
-                >
-                  +
-                </button>
-                <button
-                  onClick={() => setIsExpandedProductType((prev) => !prev)}
-                  className="text-lg transform transition-transform"
-                  style={{ transform: isExpandedProductType ? "rotate(0deg)" : "rotate(180deg)" }}
-                >
-                  ▲
-                </button>
+                <button onClick={() => setShowFormType((prev) => !prev)} className="text-xl font-bold px-2 py-1 rounded hover:bg-gray-400 transition">+</button>
+                <button onClick={() => setIsExpandedProductType((prev) => !prev)} className="text-lg transition-transform" style={{ transform: isExpandedProductType ? "rotate(0deg)" : "rotate(180deg)" }}>▲</button>
               </div>
             </div>
 
             {isExpandedProductType && (
               <div className="px-4 py-2 space-y-2">
                 {productType.map((type) => (
-                  <div key={type._id} className="p-2 bg-gray-100 border rounded shadow-sm">
-                    {type.name}
+                  <div key={type._id} className="p-2 bg-gray-100 border rounded shadow-sm flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+                    <div className="w-1/2 text-gray-800">{type.name}</div>
+
+                    {type.shortname ? (
+                      <span className="text-gray-600">{type.shortname}</span>
+                    ) : (
+                      <>
+                        <input
+                          type="text"
+                          className="border border-gray-300 px-2 py-1 rounded w-[120px] text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-400"
+                          placeholder="Short Name"
+                          value={editingTypeShortnames[type._id] || ""}
+                          onChange={(e) =>
+                            setEditingTypeShortnames((prev) => ({
+                              ...prev,
+                              [type._id]: e.target.value,
+                            }))
+                          }
+                        />
+                        <button
+                          onClick={() =>
+                            handleProductTypeShortNameSave({
+                              ...type,
+                              shortname: editingTypeShortnames[type._id] || "",
+                            })
+                          }
+                          className="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded text-sm"
+                        >
+                          Save
+                        </button>
+                      </>
+                    )}
                   </div>
                 ))}
+
               </div>
             )}
 
             {showformType && (
               <div className="px-4 py-2">
-                <input
-                  type="text"
-                  className="w-full px-3 py-2 border rounded focus:outline-none"
-                  placeholder="Enter Product Type"
-                  value={prodcttypename}
-                  onChange={(e) => {
-                    setproductTypename(e.target.value);
-                    if (error) setError("");
-                  }}
-                />
+                <div className="flex gap-2 items-center">
+                  <input
+                    type="text"
+                    className="flex-1 px-3 py-2 border rounded"
+                    placeholder="Enter Product Type"
+                    value={productTypename}
+                    onChange={(e) => {
+                      setproductTypename(e.target.value);
+                      if (error) setError("");
+                    }}
+                  />
+                  {productTypename.trim() !== "" && (
+                    <input
+                      type="text"
+                      className="w-[100px] px-3 py-2 border rounded"
+                      placeholder="Short"
+                      value={shortProductTypeName}
+                      onChange={(e) => setShortproductTypeName(e.target.value)}
+                    />
+                  )}
+                </div>
+
+                <div className="flex justify-end gap-2 mt-2">
+                  <button onClick={addProductType} className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition">Save</button>
+                  <button onClick={() => { setShowFormType(false); setproductTypename(""); setShortproductTypeName(""); }} className="bg-gray-200 px-4 py-2 rounded hover:bg-gray-300 transition">Cancel</button>
+                </div>
               </div>
             )}
-
-            <div className="flex justify-end gap-2 px-4 py-2">
-              <button
-                onClick={addProductType}
-                className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition"
-              >
-                Save
-              </button>
-              <button
-                onClick={handleProductType}
-                className="bg-gray-200 px-4 py-2 rounded hover:bg-gray-300 transition"
-              >
-                Cancel
-              </button>
-            </div>
           </div>
 
-          {/* Auto Product Code Card (Switch Inside Card Body) */}
+          {/* Auto Product Code */}
           <div className="w-full md:w-[320px] border rounded shadow bg-white">
             <div className="px-4 py-4">
               <h2 className="text-lg font-semibold mb-3">Auto Product Code</h2>
@@ -281,7 +419,7 @@ export default function SystemMaster() {
                 </label>
               </div>
 
-              {autoGenerate && (
+    {autoGenerate && (
                 <>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Preview Code</label>
                   <input
@@ -294,6 +432,7 @@ export default function SystemMaster() {
                   {error && <p className="text-red-600 text-sm mt-1">{error}</p>}
                 </>
               )}
+
             </div>
           </div>
 
@@ -302,3 +441,10 @@ export default function SystemMaster() {
     </>
   );
 }
+
+
+
+
+
+
+
