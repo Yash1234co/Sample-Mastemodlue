@@ -111,7 +111,7 @@ export default function SystemMaster() {
 
       await axios.post("http://localhost:3000/createBrand", payload);
 
-      await fetchbrands(); // <-- THIS ENSURES shortname is retrieved from DB
+      await fetchbrands();
 
       setbrandname("");
       setbrandShortName("");
